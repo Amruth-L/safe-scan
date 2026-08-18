@@ -1,77 +1,74 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useSession, signOut } from './lib/auth-client'
+import AuthModal from './components/AuthModal'
 import './App.css'
 
-type ApiState = 'checking' | 'online' | 'offline'
+type ModalState = 'login' | 'register' | null
 
-function ShieldMark() {
+function LeafMark() {
   return (
-    <svg viewBox="0 0 64 72" aria-hidden="true">
-      <path d="M32 3 57 12v19c0 18-10.6 31.8-25 38C17.6 62.8 7 49 7 31V12L32 3Z" />
-      <path d="m20 35 8 8 17-19" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.58.9 9.2A7.001 7.001 0 0 1 11 20z" />
+      <path d="M19 2c-2.26 4.33-5.27 7.14-8 8" />
     </svg>
   )
 }
 
-function App() {
-  const [apiState, setApiState] = useState<ApiState>('checking')
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    fetch('/api/health', { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error('API unavailable')
-        setApiState('online')
-      })
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === 'AbortError') return
-        setApiState('offline')
-      })
-
-    return () => controller.abort()
-  }, [])
+export default function App() {
+  const { data: session } = useSession()
+  const [modal, setModal] = useState<ModalState>(null)
 
   return (
-    <main>
-      <nav aria-label="Main navigation">
-        <a className="brand" href="/" aria-label="SafeScan home">
-          <span className="brand-mark"><ShieldMark /></span>
+    <>
+      {/* Navbar */}
+      <nav id="main-nav">
+        {/* Brand */}
+        <a id="brand-link" className="brand" href="/" aria-label="SafeScan home">
+          <LeafMark />
           <span>SafeScan</span>
         </a>
-        <div className={`api-state ${apiState}`} role="status">
-          <span className="status-dot" />
-          API {apiState}
+
+        {/* Right side */}
+        <div className="nav-right">
+          {session ? (
+            <>
+              <span className="nav-user">{session.user.email}</span>
+              <button
+                id="signout-btn"
+                className="btn-ghost"
+                onClick={() => signOut()}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                id="login-btn"
+                className="btn-ghost"
+                onClick={() => setModal('login')}
+              >
+                Log in
+              </button>
+              <button
+                id="register-btn"
+                className="btn-green"
+                onClick={() => setModal('register')}
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
-      <section className="hero">
-        <div className="eyebrow"><span>01</span> Secure inspection platform</div>
-        <h1>Scan clearly.<br /><em>Act safely.</em></h1>
-        <p className="intro">
-          Your SafeScan workspace is ready. React is serving the interface and
-          Express is standing by for your first scan.
-        </p>
-        <div className="stack-grid" aria-label="Project stack">
-          <article>
-            <span className="card-number">FRONT / 5173</span>
-            <h2>Vite + React</h2>
-            <p>Fast refresh, TypeScript, and a clean foundation for the scanner UI.</p>
-          </article>
-          <article>
-            <span className="card-number">API / 3000</span>
-            <h2>Express + TS</h2>
-            <p>A strict TypeScript API with health checks and production builds.</p>
-          </article>
-        </div>
-      </section>
-
-      <footer>
-        <span>System initialized</span>
-        <span className="rule" />
-        <code>safe-scan/v1</code>
-      </footer>
-    </main>
+      {/* Auth Modal */}
+      {modal && (
+        <AuthModal
+          defaultTab={modal}
+          onClose={() => setModal(null)}
+        />
+      )}
+    </>
   )
 }
-
-export default App
