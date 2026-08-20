@@ -1,16 +1,16 @@
 import express from 'express';
-import { summarizeText } from '../services/ai.service.js';
+import { summarizeProduct } from '../services/ai.service.js';
 const router = express.Router();
 router.post("/summarize", async (req, res) => {
     try {
-        const { text } = req.body;
-        if (!text || !text.trim()) {
+        const product = req.body;
+        if (!product.title || !product.description) {
             return res.status(400).json({
-                error: "Text is required",
+                success: false,
+                error: "Product title and description are required",
             });
         }
-        const summary = await summarizeText(text);
-
+        const summary = await summarizeProduct(product);
         return res.status(200).json({
             success: true,
             summary,
@@ -21,7 +21,7 @@ router.post("/summarize", async (req, res) => {
 
         return res.status(500).json({
             success: false,
-            error: "Failed to summarize text",
+            error: "Failed to summarize product",
         });
     }
 });

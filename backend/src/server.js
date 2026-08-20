@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import { toNodeHandler } from 'better-auth/node'
 import { auth } from './auth.js'
+import aiRoutes from "./routes/ai.routes.js";
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -20,6 +21,9 @@ app.all('/api/auth/*splat', toNodeHandler(auth))
 
 // ── Body parser (for your own routes) 
 app.use(express.json())
+
+//AI routes
+app.use("/api/ai", aiRoutes)
 
 // ── Health check ──
 app.get('/api/health', (req, res) => {
