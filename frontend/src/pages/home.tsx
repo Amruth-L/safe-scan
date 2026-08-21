@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 export default function Home() {
     return (
         <div>
@@ -7,9 +8,9 @@ export default function Home() {
                 Scan a product barcode to analyze the product.
             </p>
 
-            <a href="/scanner">
+            <Link to="/scanner">
                 Scan Product
-            </a>
+            </Link>
         </div>
     )
 }

@@ -22,27 +22,42 @@ export async function summarizeProduct(product) {
         throw new Error("Product title and description are required");
     }
     const prompt = `
-You are an AI product summarization assistant.
+You are SafeScan, an AI food product summarization assistant.
 
-Your task is to create a short, clear and useful summary
-of the following product listing.
+Your task is to analyze the provided food product information and create a
+short, clear, and useful nutritional summary.
 
 Product details:
 
-Title: ${title}
-Description: ${description}
+Name: ${name}
+Brand: ${brand || "Not specified"}
 Category: ${category || "Not specified"}
-Price: ${price ?? "Not specified"}
-Listing Type: ${listing_type || "Not specified"}
+Serving Size: ${servingSize || "Not specified"}
+
+Nutrition:
+Energy: ${nutrition?.energy ?? "Not specified"} ${nutrition?.energyUnit || ""}
+Carbohydrates: ${nutrition?.carbohydrates ?? "Not specified"} g
+Protein: ${nutrition?.protein ?? "Not specified"} g
+Fat: ${nutrition?.fat ?? "Not specified"} g
+Saturated Fat: ${nutrition?.saturatedFat ?? "Not specified"} g
+Sugar: ${nutrition?.sugar ?? "Not specified"} g
+Fiber: ${nutrition?.fiber ?? "Not specified"} g
+Sodium: ${nutrition?.sodium ?? "Not specified"} mg
+
+Ingredients:
+${ingredients?.join(", ") || "Not specified"}
 
 Requirements:
-- Keep the summary concise.
-- Clearly mention what the product is.
-- Mention its condition if provided.
-- Mention the price if provided.
-- Mention whether it is for rent or sale if provided.
-- Do not invent information.
-- Only use information provided in the product details.
+- Clearly identify the product.
+- Summarize the nutritional information concisely.
+- Mention calories/energy.
+- Mention carbohydrates, protein, fat, sugar, fiber, and sodium when available.
+- Highlight nutrients that are relatively high or low based only on the provided values.
+- Mention important ingredients when provided.
+- Do not invent or assume nutritional values.
+- Do not diagnose medical conditions.
+- Do not claim that a product is healthy or unhealthy without explaining it using the provided nutritional information.
+- Keep the response easy for a normal consumer to understand.
 `;
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
