@@ -1,15 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   BrowserRouter,
   Routes,
   Route,
   Link,
+  Navigate,
+  useSearchParams,
 } from 'react-router-dom'
 
 import { useSession, signOut } from './lib/auth-client'
 import AuthModal from './components/AuthModal'
 import Home from './pages/home.tsx'
 import Scanner from './pages/scanner.tsx'
+import ProductAnalysis from './pages/ProductAnalysis.tsx'
 
 import './App.css'
 
@@ -34,8 +37,18 @@ function LeafMark() {
 }
 
 function Layout() {
-  const { data: session } = useSession()
+  const { data: session, isPending } = useSession()
   const [modal, setModal] = useState<ModalState>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Auto-open auth modal when ?modal=login or ?modal=register is in the URL
+  useEffect(() => {
+    const m = searchParams.get('modal')
+    if (m === 'login' || m === 'register') {
+      setModal(m)
+      setSearchParams({}, { replace: true })   // clean the URL
+    }
+  }, [searchParams, setSearchParams])
 
   return (
     <>
@@ -53,11 +66,6 @@ function Layout() {
         </Link>
 
         <div className="nav-right">
-
-          {/* Scanner link */}
-          <Link to="/scanner">
-            Scan Product
-          </Link>
 
           {session ? (
             <>
@@ -107,7 +115,22 @@ function Layout() {
       {/* Pages */}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/scanner" element={<Scanner />} />
+        <Route
+          path="/scanner"
+          element={
+            isPending ? null : session
+              ? <Scanner />
+              : <Navigate to="/?modal=login" replace />
+          }
+        />
+        <Route
+          path="/analysis/:barcode"
+          element={
+            isPending ? null : session
+              ? <ProductAnalysis />
+              : <Navigate to="/?modal=login" replace />
+          }
+        />
       </Routes>
     </>
   )

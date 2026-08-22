@@ -1,7 +1,7 @@
 import express from "express";
-import { findProductByBarcode } from "../services/product.service";
-import { success } from "better-auth";
+import { findProductByBarcode } from "../services/product.service.js";
 const router = express.Router();
+
 router.get("/:barcode", (req, res) => {
     const { barcode } = req.params;
     const product = findProductByBarcode(barcode);
